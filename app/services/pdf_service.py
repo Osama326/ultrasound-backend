@@ -22,12 +22,18 @@ def build_report_pdf(report, doctor_name: str) -> str:
     c.setFont("Helvetica", 11)
     notes = report.clinical_notes or ""
     lines = [
-        f"Patient: {report.patient_name}",
-        f"Age: {report.patient_age}",
-        f"Identifier: {report.patient_identifier}",
-        f"Parity: {_extract_note_value(notes, 'Parity') or 'Not provided'}",
-        f"LMP: {_extract_note_value(notes, 'LMP') or 'Not provided'}",
-        f"Medical History: {_extract_note_value(notes, 'Medical History') or 'Not provided'}",
+        "Patient:",
+        report.patient_name,
+        "Age:",
+        report.patient_age,
+        "Identifier:",
+        report.patient_identifier,
+        "Parity:",
+        _extract_note_value(notes, "Parity") or "Not provided",
+        "LMP:",
+        _extract_note_value(notes, "LMP") or "Not provided",
+        "Medical History:",
+        _extract_note_value(notes, "Medical History") or "Not provided",
         "",
         "AI Report:",
         report.ai_report_text or "",
@@ -47,12 +53,14 @@ def build_report_pdf(report, doctor_name: str) -> str:
                 c.setFont("Helvetica", 11)
 
     signature_bottom_y = 72
+    signature_right_edge_x = width - 50
+    signature_image_x = width - 190
     if report.signature_path:
         signature_file = settings.upload_path / report.signature_path
         if signature_file.exists():
             c.drawImage(
                 ImageReader(str(signature_file)),
-                50,
+                signature_image_x,
                 signature_bottom_y + 20,
                 width=140,
                 height=50,
@@ -61,7 +69,8 @@ def build_report_pdf(report, doctor_name: str) -> str:
             )
 
     c.setFont("Helvetica-Bold", 11)
-    c.drawString(50, signature_bottom_y, f"Dr. {doctor_name}")
+    c.drawRightString(signature_right_edge_x, signature_bottom_y + 14, "Signed/Reviewed by:")
+    c.drawRightString(signature_right_edge_x, signature_bottom_y, f"Dr. {doctor_name}")
 
     c.save()
     return str(relative_path).replace("\\", "/")
